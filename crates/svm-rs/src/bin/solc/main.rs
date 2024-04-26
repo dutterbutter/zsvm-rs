@@ -15,7 +15,7 @@ fn main() {
     let code = match main_() {
         Ok(code) => code,
         Err(err) => {
-            eprintln!("svm: error: {err:?}");
+            eprintln!("zksvm: error: {err:?}");
             1
         }
     };
@@ -49,7 +49,7 @@ fn main_() -> anyhow::Result<i32> {
     let bin = svm::version_binary(&version.to_string());
     if !bin.exists() {
         anyhow::bail!(
-            "Solc version {version} is not installed or does not exist; looked at {}",
+            "zksolc version {version} is not installed or does not exist; looked at {}",
             bin.display()
         );
     }

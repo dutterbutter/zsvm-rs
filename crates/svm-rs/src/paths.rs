@@ -22,7 +22,7 @@ pub fn setup_data_dir() -> Result<(), SvmError> {
     if !data_dir.is_dir() {
         return Err(SvmError::IoError(io::Error::new(
             io::ErrorKind::AlreadyExists,
-            format!("svm data dir '{}' is not a directory", data_dir.display()),
+            format!("zksvm data dir '{}' is not a directory", data_dir.display()),
         )));
     }
 
@@ -37,14 +37,14 @@ pub fn setup_data_dir() -> Result<(), SvmError> {
 
 /// Returns the path to the default data directory.
 ///
-/// Returns `~/.svm` if it exists, otherwise uses `$XDG_DATA_HOME/svm`.
+/// Returns `~/.zksvm` if it exists, otherwise uses `$XDG_DATA_HOME/zksvm`.
 pub fn data_dir() -> &'static Path {
     static ONCE: OnceLock<PathBuf> = OnceLock::new();
     ONCE.get_or_init(|| {
         #[cfg(test)]
         {
             let dir = tempfile::tempdir().expect("could not create temp directory");
-            dir.path().join(".svm")
+            dir.path().join(".zksvm")
         }
         #[cfg(not(test))]
         {
@@ -56,11 +56,11 @@ pub fn data_dir() -> &'static Path {
 fn resolve_data_dir() -> PathBuf {
     let home_dir = dirs::home_dir()
         .expect("could not detect user home directory")
-        .join(".svm");
+        .join(".zksvm");
 
     let data_dir = dirs::data_dir().expect("could not detect user data directory");
     if !home_dir.exists() && data_dir.exists() {
-        data_dir.join("svm")
+        data_dir.join("zksvm")
     } else {
         home_dir
     }
@@ -84,7 +84,7 @@ pub fn version_path(version: &str) -> PathBuf {
 
 /// Derive path to a specific Solc version's binary file.
 ///
-/// This is currently `data_dir() / {version} / solc-{version}`.
+/// This is currently `data_dir() / {version} / zksolc-{version}`.
 pub fn version_binary(version: &str) -> PathBuf {
     let data_dir = data_dir();
     let sep = std::path::MAIN_SEPARATOR_STR;
@@ -98,7 +98,7 @@ pub fn version_binary(version: &str) -> PathBuf {
     binary.push(version);
     binary.push(sep);
 
-    binary.push("solc-");
+    binary.push("zksolc-");
     binary.push(version);
     PathBuf::from(binary)
 }
@@ -109,13 +109,13 @@ mod tests {
 
     #[test]
     fn test_data_dir_resolution() {
-        let home_dir = dirs::home_dir().unwrap().join(".svm");
+        let home_dir = dirs::home_dir().unwrap().join(".zksvm");
         let data_dir = dirs::data_dir();
         let resolved_dir = resolve_data_dir();
         if home_dir.exists() || data_dir.is_none() {
             assert_eq!(resolved_dir, home_dir);
         } else {
-            assert_eq!(resolved_dir, data_dir.unwrap().join("svm"));
+            assert_eq!(resolved_dir, data_dir.unwrap().join("zksvm"));
         }
     }
 }

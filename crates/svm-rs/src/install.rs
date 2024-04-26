@@ -18,9 +18,6 @@ use std::{fs::Permissions, os::unix::fs::PermissionsExt};
 /// The timeout to use for requests to the source
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(120);
 
-/// Version beyond which solc binaries are not fully static, hence need to be patched for NixOS.
-const NIXOS_MIN_PATCH_VERSION: Version = Version::new(0, 7, 6);
-
 /// Blocking version of [`install`]
 #[cfg(feature = "blocking")]
 pub fn blocking_install(version: &Version) -> Result<PathBuf, SvmError> {
@@ -50,18 +47,18 @@ pub fn blocking_install(version: &Version) -> Result<PathBuf, SvmError> {
     let binbytes = res.bytes()?;
     ensure_checksum(&binbytes, version, &expected_checksum)?;
 
-    // lock file to indicate that installation of this solc version will be in progress.
+    // lock file to indicate that installation of this zksolc version will be in progress.
     let lock_path = lock_file_path(version);
     // wait until lock file is released, possibly by another parallel thread trying to install the
-    // same version of solc.
+    // same version of zksolc.
     let _lock = try_lock_file(lock_path)?;
 
     do_install(version, &binbytes, artifact.to_string().as_str())
 }
 
-/// Installs the provided version of Solc in the machine.
+/// Installs the provided version of zksolc in the machine.
 ///
-/// Returns the path to the solc file.
+/// Returns the path to the zksolc file.
 pub async fn install(version: &Version) -> Result<PathBuf, SvmError> {
     setup_data_dir()?;
 
@@ -91,10 +88,10 @@ pub async fn install(version: &Version) -> Result<PathBuf, SvmError> {
     let binbytes = res.bytes().await?;
     ensure_checksum(&binbytes, version, &expected_checksum)?;
 
-    // lock file to indicate that installation of this solc version will be in progress.
+    // lock file to indicate that installation of this zksolc version will be in progress.
     let lock_path = lock_file_path(version);
     // wait until lock file is released, possibly by another parallel thread trying to install the
-    // same version of solc.
+    // same version of zksolc.
     let _lock = try_lock_file(lock_path)?;
 
     do_install(version, &binbytes, artifact.to_string().as_str())
@@ -104,7 +101,7 @@ fn do_install(version: &Version, binbytes: &[u8], _artifact: &str) -> Result<Pat
     setup_version(&version.to_string())?;
     let installer = Installer { version, binbytes };
 
-    // Solc versions <= 0.7.1 are .zip files for Windows only
+    // zksolc versions <= 0.7.1 are .zip files for Windows only
     #[cfg(all(target_os = "windows", target_arch = "x86_64"))]
     if _artifact.ends_with(".zip") {
         return installer.install_zip();
@@ -143,72 +140,46 @@ impl Drop for LockFile {
 
 /// Returns the lockfile to use for a specific file
 fn lock_file_path(version: &Version) -> PathBuf {
-    data_dir().join(format!(".lock-solc-{version}"))
+    data_dir().join(format!(".lock-zksolc-{version}"))
 }
 
-// Installer type that copies binary data to the appropriate solc binary file:
+// Installer type that copies binary data to the appropriate zksolc binary file:
 // 1. create target file to copy binary data
 // 2. copy data
 struct Installer<'a> {
-    // version of solc
+    // version of zksolc
     version: &'a Version,
-    // binary data of the solc executable
+    // binary data of the zksolc executable
     binbytes: &'a [u8],
 }
 
 impl Installer<'_> {
-    /// Installs the solc version at the version specific destination and returns the path to the installed solc file.
+    /// Installs the zksolc version at the version specific destination and returns the path to the installed zksolc file.
     fn install(self) -> Result<PathBuf, SvmError> {
-        let solc_path = version_binary(&self.version.to_string());
-
-        let mut f = fs::File::create(&solc_path)?;
+        let zksolc_path = version_binary(&self.version.to_string());
+        
+        let mut f = fs::File::create(&zksolc_path)?;
         #[cfg(target_family = "unix")]
         f.set_permissions(Permissions::from_mode(0o755))?;
         f.write_all(self.binbytes)?;
 
-        if platform::is_nixos() && *self.version >= NIXOS_MIN_PATCH_VERSION {
-            patch_for_nixos(&solc_path)?;
-        }
-
-        Ok(solc_path)
+        Ok(zksolc_path)
     }
 
-    /// Extracts the solc archive at the version specified destination and returns the path to the
-    /// installed solc binary.
+    /// Extracts the zksolc archive at the version specified destination and returns the path to the
+    /// installed zksolc binary.
     #[cfg(all(target_os = "windows", target_arch = "x86_64"))]
     fn install_zip(self) -> Result<PathBuf, SvmError> {
-        let solc_path = version_binary(&self.version.to_string());
-        let version_path = solc_path.parent().unwrap();
+        let zksolc_path = version_binary(&self.version.to_string());
+        let version_path = zksolc_path.parent().unwrap();
 
         let mut content = std::io::Cursor::new(self.binbytes);
         let mut archive = zip::ZipArchive::new(&mut content)?;
         archive.extract(version_path)?;
 
-        std::fs::rename(version_path.join("solc.exe"), &solc_path)?;
+        std::fs::rename(version_path.join("zksolc.exe"), &zksolc_path)?;
 
-        Ok(solc_path)
-    }
-}
-
-/// Patch the given binary to use the dynamic linker provided by nixos.
-fn patch_for_nixos(bin: &Path) -> Result<(), SvmError> {
-    let output = Command::new("nix-shell")
-        .arg("-p")
-        .arg("patchelf")
-        .arg("--run")
-        .arg(format!(
-            "patchelf --set-interpreter \"$(cat $NIX_CC/nix-support/dynamic-linker)\" {}",
-            bin.display()
-        ))
-        .output()
-        .expect("Failed to execute command");
-
-    match output.status.success() {
-        true => Ok(()),
-        false => Err(SvmError::CouldNotPatchForNixOs(
-            String::from_utf8_lossy(&output.stdout).into_owned(),
-            String::from_utf8_lossy(&output.stderr).into_owned(),
-        )),
+        Ok(zksolc_path)
     }
 }
 
@@ -237,7 +208,7 @@ mod tests {
     use rand::seq::SliceRandom;
 
     #[allow(unused)]
-    const LATEST: Version = Version::new(0, 8, 25);
+    const LATEST: Version = Version::new(1, 4,1);
 
     #[tokio::test]
     #[serial_test::serial]
@@ -266,13 +237,13 @@ mod tests {
     #[tokio::test]
     #[serial_test::serial]
     async fn test_version() {
-        let version = "0.8.10".parse().unwrap();
+        let version = "1.3.17".parse().unwrap();
         install(&version).await.unwrap();
-        let solc_path = version_binary(version.to_string().as_str());
-        let output = Command::new(solc_path).arg("--version").output().unwrap();
+        let zksolc_path = version_binary(version.to_string().as_str());
+        let output = Command::new(zksolc_path).arg("--version").output().unwrap();
         assert!(String::from_utf8_lossy(&output.stdout)
             .as_ref()
-            .contains("0.8.10"));
+            .contains("1.3.17"));
     }
 
     #[cfg(feature = "blocking")]
@@ -280,8 +251,8 @@ mod tests {
     #[test]
     fn blocking_test_latest() {
         blocking_install(&LATEST).unwrap();
-        let solc_path = version_binary(LATEST.to_string().as_str());
-        let output = Command::new(solc_path).arg("--version").output().unwrap();
+        let zksolc_path = version_binary(LATEST.to_string().as_str());
+        let output = Command::new(zkzksolc_path).arg("--version").output().unwrap();
 
         assert!(String::from_utf8_lossy(&output.stdout)
             .as_ref()
@@ -292,20 +263,20 @@ mod tests {
     #[serial_test::serial]
     #[test]
     fn blocking_test_version() {
-        let version = "0.8.10".parse().unwrap();
+        let version = "1.3.17".parse().unwrap();
         blocking_install(&version).unwrap();
-        let solc_path = version_binary(version.to_string().as_str());
-        let output = Command::new(solc_path).arg("--version").output().unwrap();
+        let zksolc_path = version_binary(version.to_string().as_str());
+        let output = Command::new(zksolc_path).arg("--version").output().unwrap();
 
         assert!(String::from_utf8_lossy(&output.stdout)
             .as_ref()
-            .contains("0.8.10"));
+            .contains("1.3.17"));
     }
 
     #[cfg(feature = "blocking")]
     #[test]
     fn can_install_parallel() {
-        let version: Version = "0.8.10".parse().unwrap();
+        let version: Version = "1.3.17".parse().unwrap();
         let cloned_version = version.clone();
         let t = std::thread::spawn(move || blocking_install(&cloned_version));
         blocking_install(&version).unwrap();
@@ -314,24 +285,24 @@ mod tests {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn can_install_parallel_async() {
-        let version: Version = "0.8.10".parse().unwrap();
+        let version: Version = "1.3.17".parse().unwrap();
         let cloned_version = version.clone();
         let t = tokio::task::spawn(async move { install(&cloned_version).await });
         install(&version).await.unwrap();
         t.await.unwrap().unwrap();
     }
 
-    // ensures we can download the latest universal solc for apple silicon
+    // ensures we can download the latest universal zksolc for apple silicon
     #[tokio::test(flavor = "multi_thread")]
     #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
     async fn can_install_latest_native_apple_silicon() {
-        let solc = install(&LATEST).await.unwrap();
-        let output = Command::new(solc).arg("--version").output().unwrap();
+        let zksolc = install(&LATEST).await.unwrap();
+        let output = Command::new(zksolc).arg("--version").output().unwrap();
         let version = String::from_utf8_lossy(&output.stdout);
-        assert!(version.contains("0.8.25"), "{}", version);
+        assert!(version.contains("1.4.1"), "{}", version);
     }
 
-    // ensures we can download the latest native solc for linux aarch64
+    // ensures we can download the latest native zksolc for linux aarch64
     #[tokio::test(flavor = "multi_thread")]
     #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
     async fn can_download_latest_linux_aarch64() {
@@ -356,13 +327,13 @@ mod tests {
     #[tokio::test]
     #[cfg(all(target_os = "windows", target_arch = "x86_64"))]
     async fn can_install_windows_zip_release() {
-        let version = "0.7.1".parse().unwrap();
+        let version = "1.3.17".parse().unwrap();
         install(&version).await.unwrap();
-        let solc_path = version_binary(version.to_string().as_str());
-        let output = Command::new(&solc_path).arg("--version").output().unwrap();
+        let zksolc_path = version_binary(version.to_string().as_str());
+        let output = Command::new(&zksolc_path).arg("--version").output().unwrap();
 
         assert!(String::from_utf8_lossy(&output.stdout)
             .as_ref()
-            .contains("0.7.1"));
+            .contains("1.3.17"));
     }
 }

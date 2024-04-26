@@ -20,7 +20,7 @@ impl InstallCmd {
             let version = Version::parse(&version)?;
 
             if installed_versions.contains(&version) {
-                println!("Solc {version} is already installed");
+                println!("zksolc {version} is already installed");
                 let input: String = Input::new()
                     .with_prompt("Would you like to set it as the global version?")
                     .with_initial_text("Y")
@@ -33,7 +33,7 @@ impl InstallCmd {
             } else if all_versions.contains(&version) {
                 let spinner = print::installing_version(&version);
                 svm::install(&version).await?;
-                spinner.finish_with_message(format!("Downloaded Solc: {version}"));
+                spinner.finish_with_message(format!("Downloaded zksolc: {version}"));
                 if current_version.is_none() {
                     svm::set_global_version(&version)?;
                     print::set_global_version(&version);
@@ -53,11 +53,11 @@ mod tests {
 
     #[test]
     fn parse_install() {
-        let args: InstallCmd = InstallCmd::parse_from(["svm", "0.8.11", "0.8.10"]);
+        let args: InstallCmd = InstallCmd::parse_from(["zksvm", "1.3.17", "1.3.16"]);
         assert_eq!(
             args,
             InstallCmd {
-                versions: vec!["0.8.11".into(), "0.8.10".into()]
+                versions: vec!["1.3.17".into(), "1.3.16".into()]
             }
         );
     }

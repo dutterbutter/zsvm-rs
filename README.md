@@ -23,16 +23,16 @@ cargo install --locked --git https://github.com/alloy-rs/svm-rs/
 ## Usage
 
 ```sh
-Solc version manager
+zksolc version manager
 
 Usage: svm <COMMAND>
 
 Commands:
   help     Print this message or the help of the given subcommand(s)
-  install  Install Solc versions
-  list     List all Solc versions
-  remove   Remove a Solc version, or "all" to remove all versions
-  use      Set a Solc version as the global default
+  install  Install zksolc versions
+  list     List all zksolc versions
+  remove   Remove a zksolc version, or "all" to remove all versions
+  use      Set a zksolc version as the global default
 
 Options:
   -h, --help     Print help

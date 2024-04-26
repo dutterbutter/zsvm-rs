@@ -39,7 +39,7 @@ fn get_platform() -> svm::Platform {
 
 fn version_const_name(version: &Version) -> String {
     format!(
-        "SOLC_VERSION_{}_{}_{}",
+        "ZKSOLC_VERSION_{}_{}_{}",
         version.major, version.minor, version.patch
     )
 }
@@ -68,7 +68,7 @@ fn add_build_info_constants(
 
         let sha256 = hex::encode(&build.sha256);
         let checksum_name = format!(
-            "SOLC_VERSION_{}_{}_{}_CHECKSUM",
+            "ZKSOLC_VERSION_{}_{}_{}_CHECKSUM",
             build.version.major, build.version.minor, build.version.patch
         );
 

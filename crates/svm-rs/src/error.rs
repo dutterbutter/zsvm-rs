@@ -2,6 +2,7 @@ use reqwest::StatusCode;
 use thiserror::Error;
 use url::Url;
 
+// TODO: reconsider ZkvmErrors
 /// Error types from the svm_lib crate.
 #[derive(Debug, Error)]
 pub enum SvmError {
