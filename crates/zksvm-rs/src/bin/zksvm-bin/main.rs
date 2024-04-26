@@ -17,14 +17,14 @@ mod remove;
 mod r#use;
 mod utils;
 
-/// Solc version manager.
+/// zksolc version manager.
 #[derive(Debug, Parser)]
 #[clap(
-    name = "svm",
-    version = svm::VERSION_MESSAGE,
+    name = "zksvm",
+    version = zksvm::VERSION_MESSAGE,
     next_display_order = None,
 )]
-enum Svm {
+enum Zksvm {
     List(list::ListCmd),
     Install(install::InstallCmd),
     Use(r#use::UseCmd),
@@ -33,15 +33,15 @@ enum Svm {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let opt = Svm::parse();
+    let opt = Zksvm::parse();
 
-    svm::setup_data_dir()?;
+    zksvm::setup_data_dir()?;
 
     match opt {
-        Svm::List(cmd) => cmd.run().await?,
-        Svm::Install(cmd) => cmd.run().await?,
-        Svm::Use(cmd) => cmd.run().await?,
-        Svm::Remove(cmd) => cmd.run().await?,
+        Zksvm::List(cmd) => cmd.run().await?,
+        Zksvm::Install(cmd) => cmd.run().await?,
+        Zksvm::Use(cmd) => cmd.run().await?,
+        Zksvm::Remove(cmd) => cmd.run().await?,
     }
 
     Ok(())
@@ -54,6 +54,6 @@ mod tests {
 
     #[test]
     fn verify_cli() {
-        Svm::command().debug_assert();
+        Zksvm::command().debug_assert();
     }
 }

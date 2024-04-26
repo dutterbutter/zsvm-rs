@@ -1461,46 +1461,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
-name = "svm-rs"
-version = "0.5.2"
-dependencies = [
- "anyhow",
- "clap",
- "console",
- "const-hex",
- "dialoguer",
- "dirs",
- "fs4",
- "indicatif",
- "itertools",
- "once_cell",
- "rand",
- "reqwest",
- "semver",
- "serde",
- "serde_json",
- "serial_test",
- "sha2",
- "tempfile",
- "thiserror",
- "tokio",
- "url",
- "vergen",
- "zip",
-]
-
-[[package]]
-name = "svm-rs-builds"
-version = "0.5.2"
-dependencies = [
- "build_const",
- "const-hex",
- "semver",
- "serde_json",
- "svm-rs",
-]
-
-[[package]]
 name = "syn"
 version = "2.0.58"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2045,4 +2005,44 @@ dependencies = [
  "crc32fast",
  "crossbeam-utils",
  "flate2",
+]
+
+[[package]]
+name = "zksvm-rs"
+version = "0.5.2"
+dependencies = [
+ "anyhow",
+ "clap",
+ "console",
+ "const-hex",
+ "dialoguer",
+ "dirs",
+ "fs4",
+ "indicatif",
+ "itertools",
+ "once_cell",
+ "rand",
+ "reqwest",
+ "semver",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "sha2",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "url",
+ "vergen",
+ "zip",
+]
+
+[[package]]
+name = "zksvm-rs-builds"
+version = "0.5.2"
+dependencies = [
+ "build_const",
+ "const-hex",
+ "semver",
+ "serde_json",
+ "zksvm-rs",
 ]

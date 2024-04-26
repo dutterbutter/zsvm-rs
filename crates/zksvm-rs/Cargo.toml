@@ -1,6 +1,6 @@
 [package]
-name = "svm-rs"
-description = "Solidity compiler version manager"
+name = "zksvm-rs"
+description = "Zksolc compiler version manager"
 
 version.workspace = true
 edition.workspace = true
@@ -11,17 +11,17 @@ repository.workspace = true
 homepage.workspace = true
 
 [lib]
-name = "svm"
+name = "zksvm"
 
 [[bin]]
-name = "svm"
-path = "src/bin/svm-bin/main.rs"
+name = "zksvm"
+path = "src/bin/zksvm-bin/main.rs"
 required-features = ["cli"]
 
 [[bin]]
-name = "solc"
-path = "src/bin/solc/main.rs"
-required-features = ["solc"]
+name = "zksolc"
+path = "src/bin/zksolc/main.rs"
+required-features = ["zksolc"]
 
 [build-dependencies]
 vergen = { version = "8", optional = true, features = ["build", "git", "gitcl"] }

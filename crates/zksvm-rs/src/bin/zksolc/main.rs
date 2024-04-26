@@ -43,10 +43,10 @@ fn main_() -> anyhow::Result<i32> {
             }
         }
         // Fallback to the global version if one is not specified.
-        svm::get_global_version()?.ok_or(svm::SvmError::GlobalVersionNotSet)?
+        zksvm::get_global_version()?.ok_or(svm::SvmError::GlobalVersionNotSet)?
     };
 
-    let bin = svm::version_binary(&version.to_string());
+    let bin = zksvm::version_binary(&version.to_string());
     if !bin.exists() {
         anyhow::bail!(
             "zksolc version {version} is not installed or does not exist; looked at {}",

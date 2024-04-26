@@ -6,7 +6,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use url::Url;
 
-
 const ZKSOLC_RELEASES_URL: &str = "https://github.com/dutterbutter/zksolc-bin/tree/db/generate-list";
 
 // Update URL prefixes for the specific platforms where binaries are stored
@@ -37,13 +36,13 @@ const VERSION_MIN: Version = Version::new(1, 3, 13);
 /// {
 ///     "builds": [
 ///         {
-///             "version": "0.8.7",
+///             "version": "1.3.17",
 ///             "sha256": "0x0xcc5c663d1fe17d4eb4aca09253787ac86b8785235fca71d9200569e662677990"
 ///         }
 ///     ]
 ///     "releases": {
-///         "0.8.7": "solc-macosx-amd64-v0.8.7+commit.e28d00a7",
-///         "0.8.6": "solc-macosx-amd64-v0.8.6+commit.11564f7e",
+///         "1.3.17": "zksolc-macosx-amd64-v0.8.7+commit.e28d00a7",
+///         "1.3.16": "zksolc-macosx-amd64-v0.8.6+commit.11564f7e",
 ///         ...
 ///     }
 /// }

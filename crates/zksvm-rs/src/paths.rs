@@ -6,19 +6,19 @@ use std::{
     sync::OnceLock,
 };
 
-/// Setup SVM home directory.
+/// Setup ZKSVM home directory.
 pub fn setup_data_dir() -> Result<(), SvmError> {
-    // create $XDG_DATA_HOME or ~/.local/share/svm, or fallback to ~/.svm
+    // create $XDG_DATA_HOME or ~/.local/share/zksvm, or fallback to ~/.zksvm
     let data_dir = data_dir();
 
     // Create the directory, continuing if the directory came into existence after the check
-    // for this if statement. This may happen if two copies of SVM run simultaneously (e.g CI).
+    // for this if statement. This may happen if two copies of zksvm run simultaneously (e.g CI).
     fs::create_dir_all(data_dir).or_else(|err| match err.kind() {
         io::ErrorKind::AlreadyExists => Ok(()),
         _ => Err(err),
     })?;
 
-    // Check that the SVM directory is indeed a directory, and not e.g. a file.
+    // Check that the zksvm directory is indeed a directory, and not e.g. a file.
     if !data_dir.is_dir() {
         return Err(SvmError::IoError(io::Error::new(
             io::ErrorKind::AlreadyExists,
@@ -26,7 +26,7 @@ pub fn setup_data_dir() -> Result<(), SvmError> {
         )));
     }
 
-    // Create `$SVM/.global-version`.
+    // Create `$ZKSVM/.global-version`.
     let global_version = global_version_path();
     if !global_version.exists() {
         fs::File::create(global_version)?;
@@ -72,7 +72,7 @@ pub fn global_version_path() -> &'static Path {
     ONCE.get_or_init(|| data_dir().join(".global-version"))
 }
 
-/// Returns the path to a specific Solc version's directory.
+/// Returns the path to a specific zksolc version's directory.
 ///
 /// Note that this is not the path to the actual Solc binary file;
 /// use [`version_binary`] for that instead.
@@ -82,7 +82,7 @@ pub fn version_path(version: &str) -> PathBuf {
     data_dir().join(version)
 }
 
-/// Derive path to a specific Solc version's binary file.
+/// Derive path to a specific zksolc version's binary file.
 ///
 /// This is currently `data_dir() / {version} / zksolc-{version}`.
 pub fn version_binary(version: &str) -> PathBuf {

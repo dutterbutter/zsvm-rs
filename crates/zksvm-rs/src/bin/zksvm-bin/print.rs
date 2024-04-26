@@ -41,7 +41,7 @@ pub fn available_versions(versions: Vec<Version>) {
 pub fn installing_version(version: &Version) -> ProgressBar {
     let spinner = ProgressBar::new_spinner();
     spinner.enable_steady_tick(Duration::from_millis(120));
-    spinner.set_message(format!("Downloading Solc {version}"));
+    spinner.set_message(format!("Downloading zksolc {version}"));
     spinner.set_style(
         ProgressStyle::default_spinner()
             .tick_strings(&[

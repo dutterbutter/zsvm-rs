@@ -3,9 +3,9 @@
 use std::fs::File;
 
 use semver::Version;
-use svm::Releases;
+use zksvm::Releases;
 
-/// The string describing the [svm::Platform] to build for
+/// The string describing the [zksvm::Platform] to build for
 ///
 /// Supported values are:
 ///
@@ -14,7 +14,7 @@ use svm::Releases;
 /// - "macosx-amd64"
 /// - "macosx-aarch64"
 /// - "windows-amd64"
-pub const SVM_TARGET_PLATFORM: &str = "SVM_TARGET_PLATFORM";
+pub const ZKSVM_TARGET_PLATFORM: &str = "ZKSVM_TARGET_PLATFORM";
 
 /// The path to the releases JSON file, that was pre-fetched manually. If this
 /// variable is defined, svm-builds won't attempt to deduce anything about the
@@ -23,17 +23,17 @@ pub const SVM_TARGET_PLATFORM: &str = "SVM_TARGET_PLATFORM";
 ///
 /// Must follow the same format as the upstream `list.json`, e.g.
 /// [this one](https://raw.githubusercontent.com/nikitastupin/solc/af2fce8988e41753ab4f726e0273ea8244de5dba/linux/aarch64/list.json)
-pub const SVM_RELEASES_LIST_JSON: &str = "SVM_RELEASES_LIST_JSON";
+pub const ZKSVM_RELEASES_LIST_JSON: &str = "ZKSVM_RELEASES_LIST_JSON";
 
 /// Returns the platform to generate the constants for
 ///
-/// if the `SVM_TARGET_PLATFORM` var is set, this will return the matching [svm::Platform],
-/// otherwise the native platform will be used [svm::platform()].
-fn get_platform() -> svm::Platform {
-    if let Ok(s) = std::env::var(SVM_TARGET_PLATFORM) {
+/// if the `SVM_TARGET_PLATFORM` var is set, this will return the matching [zksvm::Platform],
+/// otherwise the native platform will be used [zksvm::platform()].
+fn get_platform() -> zksvm::Platform {
+    if let Ok(s) = std::env::var(ZKSVM_TARGET_PLATFORM) {
         s.parse().unwrap()
     } else {
-        svm::platform()
+        zksvm::platform()
     }
 }
 
@@ -48,7 +48,7 @@ fn version_const_name(version: &Version) -> String {
 fn add_build_info_constants(
     writer: &mut build_const::ConstValueWriter,
     releases: &Releases,
-    platform: svm::Platform,
+    platform: zksvm::Platform,
 ) {
     let mut version_idents = Vec::with_capacity(releases.builds.len());
     let mut checksum_match_arms = Vec::with_capacity(releases.builds.len());
@@ -109,10 +109,10 @@ pub fn get_checksum(version: &semver::Version) -> Option<Vec<u8>> {{
 }
 
 /// checks the current platform and adds it as constant
-fn add_platform_const(writer: &mut build_const::ConstValueWriter, platform: svm::Platform) {
+fn add_platform_const(writer: &mut build_const::ConstValueWriter, platform: zksvm::Platform) {
     writer.add_raw(&format!(
         r#"
-/// The `svm::Platform` all constants were built for
+/// The `zksvm::Platform` all constants were built for
 pub const TARGET_PLATFORM: &str = "{}";
 "#,
         platform
@@ -122,22 +122,22 @@ pub const TARGET_PLATFORM: &str = "{}";
 fn generate() {
     let platform = get_platform();
 
-    let releases: Releases = if let Ok(file_path) = std::env::var(SVM_RELEASES_LIST_JSON) {
+    let releases: Releases = if let Ok(file_path) = std::env::var(ZKSVM_RELEASES_LIST_JSON) {
         let file = File::open(file_path).unwrap_or_else(|_| {
             panic!(
                 "{:?} defined, but cannot read the file referenced",
-                SVM_RELEASES_LIST_JSON
+                ZKSVM_RELEASES_LIST_JSON
             )
         });
 
         serde_json::from_reader(file).unwrap_or_else(|_| {
             panic!(
                 "Failed to parse the JSON from {:?} file",
-                SVM_RELEASES_LIST_JSON
+                ZKSVM_RELEASES_LIST_JSON
             )
         })
     } else {
-        svm::blocking_all_releases(platform).expect("Failed to fetch releases")
+        zksvm::blocking_all_releases(platform).expect("Failed to fetch releases")
     };
 
     let mut writer = build_const::ConstWriter::for_build("builds")
