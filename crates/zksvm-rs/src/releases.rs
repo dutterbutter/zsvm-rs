@@ -1,5 +1,4 @@
 use crate::{error::SvmError, platform::Platform};
-use once_cell::sync::Lazy;
 use reqwest::get;
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -176,7 +175,7 @@ pub async fn all_releases(platform: Platform) -> Result<Releases, SvmError> {
 
 /// unifies the releases with old releases if on linux
 // TODO: remove this function once all platforms have been updated
-fn unified_releases(releases: Releases, platform: Platform) -> Releases {
+fn unified_releases(releases: Releases, _platform: Platform) -> Releases {
     releases
 }
 

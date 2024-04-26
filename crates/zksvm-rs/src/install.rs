@@ -7,8 +7,7 @@ use sha2::Digest;
 use std::{
     fs,
     io::Write,
-    path::{Path, PathBuf},
-    process::Command,
+    path::PathBuf,
     time::Duration,
 };
 
